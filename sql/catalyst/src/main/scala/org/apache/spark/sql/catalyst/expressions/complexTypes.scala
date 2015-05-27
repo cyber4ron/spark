@@ -24,7 +24,8 @@ import org.apache.spark.sql.types._
  * Returns an Array containing the evaluation of all children expressions.
  */
 case class CreateArray(children: Seq[Expression]) extends Expression {
-
+  override type EvaluatedType = Any
+  
   override def foldable: Boolean = children.forall(_.foldable)
   
   lazy val childTypes = children.map(_.dataType).distinct
@@ -53,6 +54,7 @@ case class CreateArray(children: Seq[Expression]) extends Expression {
  * TODO: [[CreateStruct]] does not support codegen.
  */
 case class CreateStruct(children: Seq[NamedExpression]) extends Expression {
+  override type EvaluatedType = Row
 
   override def foldable: Boolean = children.forall(_.foldable)
 
@@ -69,7 +71,7 @@ case class CreateStruct(children: Seq[NamedExpression]) extends Expression {
 
   override def nullable: Boolean = false
 
-  override def eval(input: Row): Any = {
+  override def eval(input: Row): EvaluatedType = {
     Row(children.map(_.eval(input)): _*)
   }
 }

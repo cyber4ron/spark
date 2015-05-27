@@ -35,6 +35,8 @@ trait Predicate extends Expression {
   self: Product =>
 
   override def dataType: DataType = BooleanType
+
+  type EvaluatedType = Any
 }
 
 trait PredicateHelper {
@@ -339,6 +341,8 @@ case class If(predicate: Expression, trueValue: Expression, falseValue: Expressi
     trueValue.dataType
   }
 
+  type EvaluatedType = Any
+
   override def eval(input: Row): Any = {
     if (true == predicate.eval(input)) {
       trueValue.eval(input)
@@ -352,6 +356,8 @@ case class If(predicate: Expression, trueValue: Expression, falseValue: Expressi
 
 trait CaseWhenLike extends Expression {
   self: Product =>
+
+  type EvaluatedType = Any
 
   // Note that `branches` are considered in consecutive pairs (cond, val), and the optional last
   // element is the value for the default catch-all case (if provided).

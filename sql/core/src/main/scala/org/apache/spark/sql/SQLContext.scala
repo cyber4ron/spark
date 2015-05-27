@@ -392,7 +392,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
     SparkPlan.currentContext.set(self)
     val schema = ScalaReflection.schemaFor[A].dataType.asInstanceOf[StructType]
     val attributeSeq = schema.toAttributes
-    val rowRDD = RDDConversions.productToRowRdd(rdd, schema.map(_.dataType))
+    val rowRDD = RDDConversions.productToRowRdd(rdd, schema)
     DataFrame(self, LogicalRDD(attributeSeq, rowRDD)(self))
   }
 

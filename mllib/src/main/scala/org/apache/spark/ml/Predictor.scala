@@ -58,6 +58,7 @@ private[ml] trait PredictorParams extends Params
 
 /**
  * :: DeveloperApi ::
+ *
  * Abstraction for prediction problems (regression and classification).
  *
  * @tparam FeaturesType  Type of features.
@@ -112,6 +113,7 @@ abstract class Predictor[
    *
    * The default value is VectorUDT, but it may be overridden if FeaturesType is not Vector.
    */
+  @DeveloperApi
   private[ml] def featuresDataType: DataType = new VectorUDT
 
   override def transformSchema(schema: StructType): StructType = {
@@ -132,6 +134,7 @@ abstract class Predictor[
 
 /**
  * :: DeveloperApi ::
+ *
  * Abstraction for a model for prediction tasks (regression and classification).
  *
  * @tparam FeaturesType  Type of features.

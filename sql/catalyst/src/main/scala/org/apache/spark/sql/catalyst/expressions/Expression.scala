@@ -25,6 +25,9 @@ import org.apache.spark.sql.types._
 abstract class Expression extends TreeNode[Expression] {
   self: Product =>
 
+  /** The narrowest possible type that is produced when this expression is evaluated. */
+  type EvaluatedType <: Any
+
   /**
    * Returns true when an expression is a candidate for static evaluation before the query is
    * executed.
@@ -41,7 +44,7 @@ abstract class Expression extends TreeNode[Expression] {
   def references: AttributeSet = AttributeSet(children.flatMap(_.references.iterator))
 
   /** Returns the result of evaluating this expression on a given input Row */
-  def eval(input: Row = null): Any
+  def eval(input: Row = null): EvaluatedType
 
   /**
    * Returns `true` if this expression and all its children have been resolved to a specific schema
@@ -114,7 +117,8 @@ abstract class UnaryExpression extends Expression with trees.UnaryNode[Expressio
 // not like a real expressions.
 case class GroupExpression(children: Seq[Expression]) extends Expression {
   self: Product =>
-  override def eval(input: Row): Any = throw new UnsupportedOperationException
+  type EvaluatedType = Seq[Any]
+  override def eval(input: Row): EvaluatedType = throw new UnsupportedOperationException
   override def nullable: Boolean = false
   override def foldable: Boolean = false
   override def dataType: DataType = throw new UnsupportedOperationException

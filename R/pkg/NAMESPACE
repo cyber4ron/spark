@@ -143,3 +143,6 @@ export("structField",
        "structType.jobj",
        "structType.structField",
        "print.structType")
+
+# feature base service api
+export("getFeats")

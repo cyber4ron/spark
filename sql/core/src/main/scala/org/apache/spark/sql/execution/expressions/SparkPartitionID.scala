@@ -27,6 +27,8 @@ import org.apache.spark.sql.types.{IntegerType, DataType}
  */
 private[sql] case object SparkPartitionID extends LeafExpression {
 
+  override type EvaluatedType = Int
+
   override def nullable: Boolean = false
 
   override def dataType: DataType = IntegerType

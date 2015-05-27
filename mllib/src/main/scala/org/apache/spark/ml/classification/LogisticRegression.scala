@@ -19,11 +19,11 @@ package org.apache.spark.ml.classification
 
 import scala.collection.mutable
 
-import breeze.linalg.{DenseVector => BDV, norm => brzNorm}
-import breeze.optimize.{CachedDiffFunction, DiffFunction, LBFGS => BreezeLBFGS, OWLQN => BreezeOWLQN}
+import breeze.linalg.{norm => brzNorm, DenseVector => BDV}
+import breeze.optimize.{LBFGS => BreezeLBFGS, OWLQN => BreezeOWLQN}
+import breeze.optimize.{CachedDiffFunction, DiffFunction}
 
-import org.apache.spark.{Logging, SparkException}
-import org.apache.spark.annotation.Experimental
+import org.apache.spark.annotation.AlphaComponent
 import org.apache.spark.ml.param._
 import org.apache.spark.ml.param.shared._
 import org.apache.spark.ml.util.Identifiable
@@ -35,6 +35,7 @@ import org.apache.spark.mllib.util.MLUtils
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.storage.StorageLevel
+import org.apache.spark.{SparkException, Logging}
 
 /**
  * Params for logistic regression.
@@ -44,11 +45,12 @@ private[classification] trait LogisticRegressionParams extends ProbabilisticClas
   with HasThreshold
 
 /**
- * :: Experimental ::
+ * :: AlphaComponent ::
+ *
  * Logistic regression.
  * Currently, this class only supports binary classification.
  */
-@Experimental
+@AlphaComponent
 class LogisticRegression(override val uid: String)
   extends ProbabilisticClassifier[Vector, LogisticRegression, LogisticRegressionModel]
   with LogisticRegressionParams with Logging {
@@ -219,10 +221,11 @@ class LogisticRegression(override val uid: String)
 }
 
 /**
- * :: Experimental ::
+ * :: AlphaComponent ::
+ *
  * Model produced by [[LogisticRegression]].
  */
-@Experimental
+@AlphaComponent
 class LogisticRegressionModel private[ml] (
     override val uid: String,
     val weights: Vector,

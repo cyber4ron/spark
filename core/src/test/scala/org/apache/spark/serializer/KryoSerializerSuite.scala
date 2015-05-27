@@ -34,41 +34,38 @@ class KryoSerializerSuite extends FunSuite with SharedSparkContext {
   conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
   conf.set("spark.kryo.registrator", classOf[MyRegistrator].getName)
 
-  test("SPARK-7392 configuration limits") {
+  test("configuration limits") {
+    val conf1 = conf.clone()
     val kryoBufferProperty = "spark.kryoserializer.buffer"
     val kryoBufferMaxProperty = "spark.kryoserializer.buffer.max"
-    
-    def newKryoInstance(
-        conf: SparkConf,
-        bufferSize: String = "64k",
-        maxBufferSize: String = "64m"): SerializerInstance = {
-      val kryoConf = conf.clone()
-      kryoConf.set(kryoBufferProperty, bufferSize)
-      kryoConf.set(kryoBufferMaxProperty, maxBufferSize)
-      new KryoSerializer(kryoConf).newInstance()
-    }
-    
-    // test default values
-    newKryoInstance(conf, "64k", "64m")
+    conf1.set(kryoBufferProperty, "64k")
+    conf1.set(kryoBufferMaxProperty, "64m")
+    new KryoSerializer(conf1).newInstance()
     // 2048m = 2097152k
+    conf1.set(kryoBufferProperty, "2097151k")
+    conf1.set(kryoBufferMaxProperty, "64m")
     // should not throw exception when kryoBufferMaxProperty < kryoBufferProperty
-    newKryoInstance(conf, "2097151k", "64m")
-    // test maximum size with unit of KiB
-    newKryoInstance(conf, "2097151k", "2097151k")
-    // should throw exception with bufferSize out of bound
-    val thrown1 = intercept[IllegalArgumentException](newKryoInstance(conf, "2048m"))
+    new KryoSerializer(conf1).newInstance()
+    conf1.set(kryoBufferMaxProperty, "2097151k")
+    new KryoSerializer(conf1).newInstance()
+    val conf2 = conf.clone()
+    conf2.set(kryoBufferProperty, "2048m")
+    val thrown1 = intercept[IllegalArgumentException](new KryoSerializer(conf2).newInstance())
     assert(thrown1.getMessage.contains(kryoBufferProperty))
-    // should throw exception with maxBufferSize out of bound
-    val thrown2 = intercept[IllegalArgumentException](
-        newKryoInstance(conf, maxBufferSize = "2048m"))
+    val conf3 = conf.clone()
+    conf3.set(kryoBufferMaxProperty, "2048m")
+    val thrown2 = intercept[IllegalArgumentException](new KryoSerializer(conf3).newInstance())
     assert(thrown2.getMessage.contains(kryoBufferMaxProperty))
-    // should throw exception when both bufferSize and maxBufferSize out of bound
-    // exception should only contain "spark.kryoserializer.buffer"
-    val thrown3 = intercept[IllegalArgumentException](newKryoInstance(conf, "2g", "3g"))
+    val conf4 = conf.clone()
+    conf4.set(kryoBufferProperty, "2g")
+    conf4.set(kryoBufferMaxProperty, "3g")
+    val thrown3 = intercept[IllegalArgumentException](new KryoSerializer(conf4).newInstance())
     assert(thrown3.getMessage.contains(kryoBufferProperty))
     assert(!thrown3.getMessage.contains(kryoBufferMaxProperty))
-    // test configuration with mb is supported properly
-    newKryoInstance(conf, "8m", "9m")
+    val conf5 = conf.clone()
+    conf5.set(kryoBufferProperty, "8m")
+    conf5.set(kryoBufferMaxProperty, "9m")
+    new KryoSerializer(conf5).newInstance()
   }
   
   test("basic types") {

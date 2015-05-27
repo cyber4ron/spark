@@ -20,7 +20,7 @@ package org.apache.spark.ml.tuning
 import com.github.fommil.netlib.F2jBLAS
 
 import org.apache.spark.Logging
-import org.apache.spark.annotation.Experimental
+import org.apache.spark.annotation.AlphaComponent
 import org.apache.spark.ml._
 import org.apache.spark.ml.evaluation.Evaluator
 import org.apache.spark.ml.param._
@@ -79,10 +79,10 @@ private[ml] trait CrossValidatorParams extends Params {
 }
 
 /**
- * :: Experimental ::
+ * :: AlphaComponent ::
  * K-fold cross validation.
  */
-@Experimental
+@AlphaComponent
 class CrossValidator(override val uid: String) extends Estimator[CrossValidatorModel]
   with CrossValidatorParams with Logging {
 
@@ -101,6 +101,12 @@ class CrossValidator(override val uid: String) extends Estimator[CrossValidatorM
 
   /** @group setParam */
   def setNumFolds(value: Int): this.type = set(numFolds, value)
+
+  override def validateParams(paramMap: ParamMap): Unit = {
+    getEstimatorParamMaps.foreach { eMap =>
+      getEstimator.validateParams(eMap ++ paramMap)
+    }
+  }
 
   override def fit(dataset: DataFrame): CrossValidatorModel = {
     val schema = dataset.schema
@@ -141,28 +147,20 @@ class CrossValidator(override val uid: String) extends Estimator[CrossValidatorM
   override def transformSchema(schema: StructType): StructType = {
     $(estimator).transformSchema(schema)
   }
-
-  override def validateParams(): Unit = {
-    super.validateParams()
-    val est = $(estimator)
-    for (paramMap <- $(estimatorParamMaps)) {
-      est.copy(paramMap).validateParams()
-    }
-  }
 }
 
 /**
- * :: Experimental ::
+ * :: AlphaComponent ::
  * Model from k-fold cross validation.
  */
-@Experimental
+@AlphaComponent
 class CrossValidatorModel private[ml] (
     override val uid: String,
     val bestModel: Model[_])
   extends Model[CrossValidatorModel] with CrossValidatorParams {
 
-  override def validateParams(): Unit = {
-    bestModel.validateParams()
+  override def validateParams(paramMap: ParamMap): Unit = {
+    bestModel.validateParams(paramMap)
   }
 
   override def transform(dataset: DataFrame): DataFrame = {
@@ -172,10 +170,5 @@ class CrossValidatorModel private[ml] (
 
   override def transformSchema(schema: StructType): StructType = {
     bestModel.transformSchema(schema)
-  }
-
-  override def copy(extra: ParamMap): CrossValidatorModel = {
-    val copied = new CrossValidatorModel(uid, bestModel.copy(extra).asInstanceOf[Model[_]])
-    copyValues(copied, extra)
   }
 }

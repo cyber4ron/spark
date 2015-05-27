@@ -25,6 +25,8 @@ import org.apache.spark.sql.types._
 trait StringRegexExpression extends ExpectsInputTypes {
   self: BinaryExpression =>
 
+  type EvaluatedType = Any
+
   def escape(v: String): String
   def matches(regex: Pattern, str: String): Boolean
 
@@ -112,6 +114,8 @@ case class RLike(left: Expression, right: Expression)
 trait CaseConversionExpression extends ExpectsInputTypes {
   self: UnaryExpression =>
 
+  type EvaluatedType = Any
+
   def convert(v: UTF8String): UTF8String
 
   override def foldable: Boolean = child.foldable
@@ -154,6 +158,8 @@ trait StringComparison extends ExpectsInputTypes {
   self: BinaryExpression =>
 
   def compare(l: UTF8String, r: UTF8String): Boolean
+
+  override type EvaluatedType = Any
 
   override def nullable: Boolean = left.nullable || right.nullable
 
@@ -205,6 +211,8 @@ case class EndsWith(left: Expression, right: Expression)
  */
 case class Substring(str: Expression, pos: Expression, len: Expression)
   extends Expression with ExpectsInputTypes {
+  
+  type EvaluatedType = Any
 
   override def foldable: Boolean = str.foldable && pos.foldable && len.foldable
 

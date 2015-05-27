@@ -17,10 +17,10 @@
 
 package org.apache.spark.ml.classification
 
-import org.apache.spark.annotation.Experimental
+import org.apache.spark.annotation.AlphaComponent
 import org.apache.spark.ml.{PredictionModel, Predictor}
 import org.apache.spark.ml.param.ParamMap
-import org.apache.spark.ml.tree.{DecisionTreeModel, DecisionTreeParams, Node, TreeClassifierParams}
+import org.apache.spark.ml.tree.{TreeClassifierParams, DecisionTreeParams, DecisionTreeModel, Node}
 import org.apache.spark.ml.util.{Identifiable, MetadataUtils}
 import org.apache.spark.mllib.linalg.Vector
 import org.apache.spark.mllib.regression.LabeledPoint
@@ -31,13 +31,14 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.DataFrame
 
 /**
- * :: Experimental ::
+ * :: AlphaComponent ::
+ *
  * [[http://en.wikipedia.org/wiki/Decision_tree_learning Decision tree]] learning algorithm
  * for classification.
  * It supports both binary and multiclass labels, as well as both continuous and categorical
  * features.
  */
-@Experimental
+@AlphaComponent
 final class DecisionTreeClassifier(override val uid: String)
   extends Predictor[Vector, DecisionTreeClassifier, DecisionTreeClassificationModel]
   with DecisionTreeParams with TreeClassifierParams {
@@ -88,19 +89,19 @@ final class DecisionTreeClassifier(override val uid: String)
   }
 }
 
-@Experimental
 object DecisionTreeClassifier {
   /** Accessor for supported impurities: entropy, gini */
   final val supportedImpurities: Array[String] = TreeClassifierParams.supportedImpurities
 }
 
 /**
- * :: Experimental ::
+ * :: AlphaComponent ::
+ *
  * [[http://en.wikipedia.org/wiki/Decision_tree_learning Decision tree]] model for classification.
  * It supports both binary and multiclass labels, as well as both continuous and categorical
  * features.
  */
-@Experimental
+@AlphaComponent
 final class DecisionTreeClassificationModel private[ml] (
     override val uid: String,
     override val rootNode: Node)

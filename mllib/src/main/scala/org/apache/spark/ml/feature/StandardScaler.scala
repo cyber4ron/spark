@@ -17,7 +17,7 @@
 
 package org.apache.spark.ml.feature
 
-import org.apache.spark.annotation.Experimental
+import org.apache.spark.annotation.AlphaComponent
 import org.apache.spark.ml._
 import org.apache.spark.ml.param._
 import org.apache.spark.ml.param.shared._
@@ -51,11 +51,11 @@ private[feature] trait StandardScalerParams extends Params with HasInputCol with
 }
 
 /**
- * :: Experimental ::
+ * :: AlphaComponent ::
  * Standardizes features by removing the mean and scaling to unit variance using column summary
  * statistics on the samples in the training set.
  */
-@Experimental
+@AlphaComponent
 class StandardScaler(override val uid: String) extends Estimator[StandardScalerModel]
   with StandardScalerParams {
 
@@ -95,10 +95,10 @@ class StandardScaler(override val uid: String) extends Estimator[StandardScalerM
 }
 
 /**
- * :: Experimental ::
+ * :: AlphaComponent ::
  * Model fitted by [[StandardScaler]].
  */
-@Experimental
+@AlphaComponent
 class StandardScalerModel private[ml] (
     override val uid: String,
     scaler: feature.StandardScalerModel)

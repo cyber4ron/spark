@@ -193,7 +193,7 @@ function renderDagVizForJob(svgContainer) {
       // Use the link from the stage table so it also works for the history server
       var attemptId = 0
       var stageLink = d3.select("#stage-" + stageId + "-" + attemptId)
-        .select("a.name-link")
+        .select("a")
         .attr("href") + "&expandDagViz=true";
       container = svgContainer
         .append("a")

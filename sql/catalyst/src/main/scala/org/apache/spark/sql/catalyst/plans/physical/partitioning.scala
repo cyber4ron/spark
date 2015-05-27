@@ -169,7 +169,7 @@ case class HashPartitioning(expressions: Seq[Expression], numPartitions: Int)
 
   override def keyExpressions: Seq[Expression] = expressions
 
-  override def eval(input: Row = null): Any =
+  override def eval(input: Row = null): EvaluatedType =
     throw new TreeNodeException(this, s"No function to evaluate expression. type: ${this.nodeName}")
 }
 
@@ -213,6 +213,6 @@ case class RangePartitioning(ordering: Seq[SortOrder], numPartitions: Int)
 
   override def keyExpressions: Seq[Expression] = ordering.map(_.child)
 
-  override def eval(input: Row): Any =
+  override def eval(input: Row): EvaluatedType =
     throw new TreeNodeException(this, s"No function to evaluate expression. type: ${this.nodeName}")
 }
