@@ -86,7 +86,7 @@ object FeatBaseService {
   def getFeats(jsc: JavaSparkContext, args: Array[String]):  JavaRDD[String] = {
     val conf = FeatBaseService.getConf("udid_feat_base", "dl_svr_cnt,dl_clt_cnt,clk_cnt","20150522")
 
-    val featRdd = FeatBaseService.getFeats(new JavaSparkContext(sc), conf)
+    val featRdd = FeatBaseService.getFeats(jsc, conf)
 
     featRdd
   }
