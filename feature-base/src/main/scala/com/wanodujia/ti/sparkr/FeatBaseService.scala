@@ -5,17 +5,13 @@ package com.wanodujia.ti.sparkr
  */
 
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.hbase.HBaseConfiguration
-import org.apache.hadoop.hbase.mapreduce.TableInputFormat
-import org.apache.spark._
-import org.apache.spark.rdd.RDD
-
-import org.apache.hadoop.hbase.io.ImmutableBytesWritable
+import org.apache.hadoop.hbase.{CellUtil, HBaseConfiguration}
+import org.apache.hadoop.hbase.KeyValue.Type
 import org.apache.hadoop.hbase.client.Result
-
-import java.util.List
-
-import org.apache.spark.api.java.{JavaPairRDD, JavaRDD, JavaSparkContext}
+import org.apache.hadoop.hbase.io.ImmutableBytesWritable
+import org.apache.hadoop.hbase.mapreduce.TableInputFormat
+import org.apache.hadoop.hbase.util.Bytes
+import org.apache.spark.api.java.{JavaRDD, JavaSparkContext}
 
 object FeatBaseService {
   def getConf(tableName: String, fieldsStr: String, date: String): Configuration = {
@@ -62,10 +58,25 @@ object FeatBaseService {
   }
 
   // API
-  def getFeats(jsc: JavaSparkContext, conf: HBaseConfiguration): org.apache.spark.api.java.JavaRDD[(org.apache.hadoop.hbase.io.ImmutableBytesWritable, org.apache.hadoop.hbase.client.Result)] = {
+  def getFeats(jsc: JavaSparkContext, conf: Configuration): org.apache.spark.api.java.JavaRDD[(org.apache.hadoop.hbase.io.ImmutableBytesWritable, org.apache.hadoop.hbase.client.Result)] = {
     val hBaseRDD = jsc.sc.newAPIHadoopRDD(conf, classOf[TableInputFormat],
       classOf[ImmutableBytesWritable],
       classOf[Result])
+
+    //keyValue is a RDD[java.util.list[hbase.KeyValue]]
+    val keyValue = hBaseRDD.map(x => x._2).map(_.list)
+
+    //outPut is a RDD[String], in which each line represents a record in HBase
+    val outPut = keyValue.flatMap(x => x.asScala.map(cell =>
+      "columnFamily=%s,qualifier=%s,timestamp=%s,type=%s,value=%s".format(
+        Bytes.toStringBinary(CellUtil.cloneFamily(cell)),
+        Bytes.toStringBinary(CellUtil.cloneQualifier(cell)),
+        cell.getTimestamp.toString,
+        Type.codeToType(cell.getTypeByte),
+        Bytes.toStringBinary(CellUtil.cloneValue(cell))
+      )
+    )
+    )
 
     JavaRDD.fromRDD(hBaseRDD)
   }
