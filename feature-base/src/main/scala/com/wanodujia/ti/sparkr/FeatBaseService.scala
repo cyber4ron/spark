@@ -43,17 +43,21 @@ object FeatBaseService {
 
   def test(jsc: JavaSparkContext, args: Array[String]):
   org.apache.spark.api.java.JavaRDD[Int] = {
-    val conf = HBaseConfiguration.create()
-    conf.set(TableInputFormat.INPUT_TABLE, args(0))
-
-    // val hBaseRDD = jsc.sc.newAPIHadoopRDD(conf, classOf[TableInputFormat],
-    //   classOf[ImmutableBytesWritable],
-    //   classOf[Result])
-
-    // hBaseRDD.count()
-    // JavaRDD.fromRDD(hBaseRDD)
 
     val testRDD = jsc.sc.parallelize(Array(1, 2, 3, 4, 5))
     JavaRDD.fromRDD(testRDD)
+  }
+
+  def testHBase(jsc: JavaSparkContext, args: Array[String]):
+  org.apache.spark.api.java.JavaRDD[(org.apache.hadoop.hbase.io.ImmutableBytesWritable, org.apache.hadoop.hbase.client.Result)] = {
+    val conf = HBaseConfiguration.create()
+    conf.set(TableInputFormat.INPUT_TABLE, args(0))
+
+    val hBaseRDD = jsc.sc.newAPIHadoopRDD(conf, classOf[TableInputFormat],
+       classOf[ImmutableBytesWritable],
+       classOf[Result])
+
+    hBaseRDD.count()
+    JavaRDD.fromRDD(hBaseRDD)
   }
 }
