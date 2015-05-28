@@ -60,7 +60,7 @@ object FeatBaseService {
   }
 
   // API
-  def getFeats(jsc: JavaSparkContext, conf: Configuration): org.apache.spark.api.java.JavaRDD[String] = {
+  def getFeats(jsc: JavaSparkContext, conf: Configuration): JavaRDD[String] = {
     val hBaseRDD = jsc.sc.newAPIHadoopRDD(conf, classOf[TableInputFormat],
       classOf[ImmutableBytesWritable],
       classOf[Result])
@@ -81,5 +81,13 @@ object FeatBaseService {
     )
 
     JavaRDD.fromRDD(outPut)
+  }
+
+  def getFeats(jsc: JavaSparkContext, args: Array[String]):  JavaRDD[String] = {
+    val conf = FeatBaseService.getConf("udid_feat_base", "dl_svr_cnt,dl_clt_cnt,clk_cnt","20150522")
+
+    val featRdd = FeatBaseService.getFeats(new JavaSparkContext(sc), conf)
+
+    featRdd
   }
 }

@@ -11,7 +11,7 @@
 #'}
 getFeats <- function(sc, args) {
   jrdd <- callJStatic("com.wanodujia.ti.sparkr.FeatBaseService",
-                      "test", sc, args)
+                      "getFeats", sc, args)
   # Assume the RDD contains serialized R objects.
   RDD(jrdd, "byte")
 }
