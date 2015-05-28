@@ -13,6 +13,8 @@ import org.apache.hadoop.hbase.mapreduce.TableInputFormat
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.spark.api.java.{JavaRDD, JavaSparkContext}
 
+import scala.collection.JavaConverters._
+
 object FeatBaseService {
   def getConf(tableName: String, fieldsStr: String, date: String): Configuration = {
 
