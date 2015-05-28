@@ -80,6 +80,6 @@ object FeatBaseService {
     )
     )
 
-    JavaRDD.fromRDD(hBaseRDD)
+    JavaRDD.fromRDD(outPut)
   }
 }
