@@ -60,7 +60,7 @@ object FeatBaseService {
   }
 
   // API
-  def getFeats(jsc: JavaSparkContext, conf: Configuration): org.apache.spark.api.java.JavaRDD[(org.apache.hadoop.hbase.io.ImmutableBytesWritable, org.apache.hadoop.hbase.client.Result)] = {
+  def getFeats(jsc: JavaSparkContext, conf: Configuration): org.apache.spark.api.java.JavaRDD[String] = {
     val hBaseRDD = jsc.sc.newAPIHadoopRDD(conf, classOf[TableInputFormat],
       classOf[ImmutableBytesWritable],
       classOf[Result])
