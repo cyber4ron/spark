@@ -4,7 +4,7 @@ package com.wanodujia.ti.sparkr
  * @author fegnlei@wandoujia.com, 15-5-25
  */
 
-import java.io.IOException
+import java.util
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.hbase.client.Result
@@ -41,30 +41,45 @@ object FeatBaseService {
     conf.set(TableInputFormat.SCAN_TIMERANGE_START, dateStart)
     conf.set(TableInputFormat.SCAN_TIMERANGE_END, dateEnd)
     conf.set(TableInputFormat.SCAN_CACHEDROWS, "100")
+    conf.set("fields", fieldsStr)
 
     conf
   }
 
+  def constrFeat(kv: org.apache.hadoop.hbase.KeyValue): Array[String] = {
+    Array(
+      Bytes.toStringBinary(CellUtil.cloneRow(cell)), // row key
+      Bytes.toStringBinary(CellUtil.cloneQualifier(cell)), // cq
+      cell.getTimestamp.toString, // ts
+      Bytes.toStringBinary(CellUtil.cloneValue(cell)) // val
+    )
+  }
+
   def getFeats(jsc: JavaSparkContext, conf: Configuration): JavaRDD[Array[String]] = {
-    val hBaseRDD = jsc.sc.newAPIHadoopRDD(conf, classOf[TableInputFormat],
+    val hbaseResultRDD = jsc.sc.newAPIHadoopRDD(conf, classOf[TableInputFormat],
       classOf[ImmutableBytesWritable],
       classOf[Result])
 
-    //keyValue is a RDD[java.util.list[hbase.KeyValue]]
-    val keyValue = hBaseRDD.map(x => x._2).map(_.list)
+    val flatResultRDD = hbaseResultRDD.map(x => x._2)
+      .map(_.listCells())
+      .flatMap(x => x.asScala.map(cell => constrFeat(cell)))
 
-    //outPut is a RDD[String], in which each line represents a record in HBase
-    val outPut = keyValue.flatMap(x => x.asScala.map(cell => Array(
-        Bytes.toStringBinary(CellUtil.cloneRow(cell)),        // row key
-        Bytes.toStringBinary(CellUtil.cloneFamily(cell)),     // cf
-        Bytes.toStringBinary(CellUtil.cloneQualifier(cell)),  // cq
-        cell.getTimestamp.toString,                           // ts
-        Bytes.toStringBinary(CellUtil.cloneValue(cell))       // val
-      )
-    )
-    )
+    val outputRDD = flatResultRDD
+      .groupBy(ft => ft(0) + ft(2)) // group key is udid + ts
+      .map((groupKey: String, feats: Iterable[Array[String]]) => {
+      val featMap = new util.HashMap[String, String]()
+      feats.foreach(featMap.put(_(1), _(3)))
 
-    JavaRDD.fromRDD(outPut)
+      val resultFeats = ""
+      conf.get("feats").split(',').foreach(ft => {
+        if (resultFeats == "") resultFeats += featMap.get(ft)
+        else resultFeats += "," + featMap.get(ft)
+      })
+
+      return Array(ft(0), resultFeats, ft(2)) // Array(udid, features, ts)
+    })
+
+    JavaRDD.fromRDD(outputRDD)
   }
 
   //////////////// APIs
