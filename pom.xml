@@ -193,6 +193,20 @@
 
     <repositories>
         <repository>
+            <id>nexus</id>
+            <name>local private nexus</name>
+            <url>http://mvn.corp.wandoujia.com/nexus/content/groups/public</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>false</enabled></snapshots>
+        </repository>
+        <repository>
+            <id>nexus-snapshot</id>
+            <name>local private nexus</name>
+            <url>http://mvn.corp.wandoujia.com/nexus/content/groups/public-snapshots</url>
+            <releases><enabled>false</enabled></releases>
+            <snapshots><enabled>true</enabled></snapshots>
+        </repository>
+        <repository>
             <id>central</id>
             <!-- This should be at top, it makes maven try the central repo first and then others and hence faster dep resolution -->
             <name>Maven Repository</name>
@@ -272,6 +286,20 @@
         </repository>
     </repositories>
     <pluginRepositories>
+        <pluginRepository>
+            <id>nexus</id>
+            <name>local private nexus</name>
+            <url>http://mvn.corp.wandoujia.com/nexus/content/groups/public</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>false</enabled></snapshots>
+        </pluginRepository>
+        <pluginRepository>
+            <id>nexus-snapshot</id>
+            <name>local private nexus</name>
+            <url>http://mvn.corp.wandoujia.com/nexus/content/groups/public-snapshots</url>
+            <releases><enabled>false</enabled></releases>
+            <snapshots><enabled>true</enabled></snapshots>
+        </pluginRepository>
         <pluginRepository>
             <id>central</id>
             <url>https://repo1.maven.org/maven2</url>
