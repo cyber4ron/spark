@@ -145,8 +145,7 @@ export("structField",
        "print.structType")
 
 # feature base service api
-export("getFeats",
-       "getFeatsWithSeed")
+export("getFeats")
 
 # additional added
 export("textFile",
