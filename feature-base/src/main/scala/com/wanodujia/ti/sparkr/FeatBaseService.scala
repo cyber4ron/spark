@@ -97,7 +97,7 @@ object FeatBaseService {
         val count = groupedRDD.count()
 
         println("========> sampling grouped rdd...")
-        val sampledRDD = groupedRDD.sample(false, 1.0 * num / count, seed)
+        val sampledRDD = groupedRDD.sample(false, 1.0 * num / count, seed.toLong)
 
         println("========> converting to output format...")
         val outputRDD = sampledRDD.map(item => {
