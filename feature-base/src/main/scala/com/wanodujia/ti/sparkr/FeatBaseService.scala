@@ -87,7 +87,7 @@ object FeatBaseService {
         flattenRDD
     }
 
-    def computeFeats(flattenRDD: RDD[Array[String]], featNames: String, num: Integer, seed: Long): JavaRDD[Array[String]] = {
+    def computeFeats(flattenRDD: RDD[Array[String]], featNames: String, num: Integer, seed: Integer): JavaRDD[Array[String]] = {
 
         println("========> grouping flatten rdd...")
         val groupedRDD = flattenRDD
@@ -134,7 +134,7 @@ object FeatBaseService {
      * @param dateRange
      * @return
      */
-    def getFeats(jsc: JavaSparkContext, featList: String, dateRange: String, num: Integer, seed: Long): JavaRDD[Array[String]] = {
+    def getFeats(jsc: JavaSparkContext, featList: String, dateRange: String, num: Integer, seed: Integer): JavaRDD[Array[String]] = {
 
         // omitted input string format checking
 
