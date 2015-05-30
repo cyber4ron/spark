@@ -8,7 +8,7 @@
 #'\dontrun{
 #' rdd <- getFeats(sc, "", "", "20150501,20150503", 10, 1)
 #'}
-getFeats <- function(sc, featList, featTypeList, dateRange, num, seed = sample(1:1000000, 1)) {
+getFeats <- function(sc, featList, featTypeList, dateRange, num, seed = base::sample(1:1000000, 1)) {
 
   jrdd <- callJStatic("com.wanodujia.ti.sparkr.FeatBaseService",
                       "getFeats", sc, featList, dateRange, num, seed)
