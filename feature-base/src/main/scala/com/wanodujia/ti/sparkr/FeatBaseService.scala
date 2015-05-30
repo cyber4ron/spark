@@ -19,6 +19,9 @@ import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 
 object FeatBaseService {
+
+    val scanCachedRows = 1000
+
     def getConf(tableName: String, fieldsStr: String, dateRange: String): Configuration = {
 
         val conf = HBaseConfiguration.create
@@ -39,10 +42,15 @@ object FeatBaseService {
         val dateStart = dates(0)
         val dateEnd = dates(1)
 
+        if (dateStart == dateEnd) {
+            conf.set(TableInputFormat.SCAN_TIMESTAMP, dateStart)
+        } else {
+            conf.set(TableInputFormat.SCAN_TIMERANGE_START, dateStart)
+            conf.set(TableInputFormat.SCAN_TIMERANGE_END, dateEnd)
+        }
+
         conf.set(TableInputFormat.SCAN_COLUMNS, cols)
-        conf.set(TableInputFormat.SCAN_TIMERANGE_START, dateStart)
-        conf.set(TableInputFormat.SCAN_TIMERANGE_END, dateEnd)
-        conf.set(TableInputFormat.SCAN_CACHEDROWS, "100")
+        conf.set(TableInputFormat.SCAN_CACHEDROWS, scanCachedRows.toString)
 
         conf
     }
@@ -55,6 +63,7 @@ object FeatBaseService {
             cell.getTimestamp.toString, // ts
             Bytes.toStringBinary(CellUtil.cloneValue(cell)) // val
         )
+
         featArr
     }
 
@@ -69,6 +78,7 @@ object FeatBaseService {
         val flattenRDD = resultRDD.map(x => x._2)
             .map(_.listCells())
             .flatMap(x => x.asScala.map(cell => constrFeat(cell)))
+
         flattenRDD
     }
 
@@ -120,6 +130,8 @@ object FeatBaseService {
      * @return
      */
     def getFeats(jsc: JavaSparkContext, featList: String, dateRange: String, num: Integer, seed: Long): JavaRDD[Array[String]] = {
+
+        // omitted input string format checking
 
         val conf = FeatBaseService.getConf("udid_feat_base", featList, dateRange)
 

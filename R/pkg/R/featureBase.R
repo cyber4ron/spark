@@ -6,10 +6,9 @@
 #' @export
 #' @examples
 #'\dontrun{
-#' sc <- sparkR.init()
-#' rdd <- getFeatsWithSeed(sc, "", "", 10, 1)
+#' rdd <- getFeats(sc, "", "", "20150501,20150503", 10, 1)
 #'}
-getFeatsWithSeed <- function(sc, featList, featTypeList, dateRange, num, seed) {
+getFeats <- function(sc, featList, featTypeList, dateRange, num, seed = sample(1:1000000, 1)) {
 
   jrdd <- callJStatic("com.wanodujia.ti.sparkr.FeatBaseService",
                       "getFeats", sc, featList, dateRange, num, seed)
@@ -43,20 +42,4 @@ getFeatsWithSeed <- function(sc, featList, featTypeList, dateRange, num, seed) {
   print("lapply done.")
 
   return(collect(typedRDD))
-}
-
-#' get features.
-#'
-#' @param sc SparkContext to use
-#' @param args args
-#' @return RDD containing serialized R objects.
-#' @export
-#' @examples
-#'\dontrun{
-#' sc <- sparkR.init()
-#' rdd <- getFeats(sc, "", "", 10)
-#'}
-getFeats <- function(sc, featList, featTypeList, dateRange, num) {
-    seed <- sample(1:.Machine$integer.max, 1)
-    getFeatsWithSeed(sc, featList, featTypeList, dateRange, num, seed)
 }
