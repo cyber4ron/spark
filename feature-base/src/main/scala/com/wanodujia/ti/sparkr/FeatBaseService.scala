@@ -13,88 +13,120 @@ import org.apache.hadoop.hbase.mapreduce.TableInputFormat
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.hbase.{CellUtil, HBaseConfiguration}
 import org.apache.spark.api.java.{JavaRDD, JavaSparkContext}
+import org.apache.spark.rdd.RDD
 
+import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 
 object FeatBaseService {
-  def getConf(tableName: String, fieldsStr: String, dateRange: String): Configuration = {
+    def getConf(tableName: String, fieldsStr: String, dateRange: String): Configuration = {
 
-    val conf = HBaseConfiguration.create
+        val conf = HBaseConfiguration.create
 
-    conf.set(TableInputFormat.INPUT_TABLE, tableName)
+        conf.set(TableInputFormat.INPUT_TABLE, tableName)
 
-    val fields = fieldsStr.split(',')
+        val fields = fieldsStr.split(',')
 
-    var cols = ""
-    for (fd <- fields) {
-      if (cols == "")
-        cols += "data:" + fd
-      else
-        cols += " " + "data:" + fd
+        var cols = ""
+        for (fd <- fields) {
+            if (cols == "")
+                cols += "data:" + fd
+            else
+                cols += " " + "data:" + fd
+        }
+
+        val dates = dateRange.split(',')
+        val dateStart = dates(0)
+        val dateEnd = dates(1)
+
+        conf.set(TableInputFormat.SCAN_COLUMNS, cols)
+        conf.set(TableInputFormat.SCAN_TIMERANGE_START, dateStart)
+        conf.set(TableInputFormat.SCAN_TIMERANGE_END, dateEnd)
+        conf.set(TableInputFormat.SCAN_CACHEDROWS, "100")
+
+        conf
     }
 
-    val dates = dateRange.split(',')
-    val dateStart = dates(0)
-    val dateEnd = dates(1)
+    def constrFeat(cell: org.apache.hadoop.hbase.Cell): Array[String] = {
 
-    conf.set(TableInputFormat.SCAN_COLUMNS, cols)
-    conf.set(TableInputFormat.SCAN_TIMERANGE_START, dateStart)
-    conf.set(TableInputFormat.SCAN_TIMERANGE_END, dateEnd)
-    conf.set(TableInputFormat.SCAN_CACHEDROWS, "100")
-    conf.set("fields", fieldsStr)
+        val featArr = Array(
+            Bytes.toStringBinary(CellUtil.cloneRow(cell)), // key
+            Bytes.toStringBinary(CellUtil.cloneQualifier(cell)), // cq
+            cell.getTimestamp.toString, // ts
+            Bytes.toStringBinary(CellUtil.cloneValue(cell)) // val
+        )
+        featArr
+    }
 
-    conf
-  }
+    def getHBaseFeats(jsc: JavaSparkContext, conf: Configuration): RDD[Array[String]] = {
 
-  def constrFeat(kv: org.apache.hadoop.hbase.KeyValue): Array[String] = {
-    Array(
-      Bytes.toStringBinary(CellUtil.cloneRow(cell)), // row key
-      Bytes.toStringBinary(CellUtil.cloneQualifier(cell)), // cq
-      cell.getTimestamp.toString, // ts
-      Bytes.toStringBinary(CellUtil.cloneValue(cell)) // val
-    )
-  }
+        println("========> getting hbase result rdd...")
+        val resultRDD = jsc.sc.newAPIHadoopRDD(conf, classOf[TableInputFormat],
+            classOf[ImmutableBytesWritable],
+            classOf[Result])
 
-  def getFeats(jsc: JavaSparkContext, conf: Configuration): JavaRDD[Array[String]] = {
-    val hbaseResultRDD = jsc.sc.newAPIHadoopRDD(conf, classOf[TableInputFormat],
-      classOf[ImmutableBytesWritable],
-      classOf[Result])
+        println("========> flattening result rdd...")
+        val flattenRDD = resultRDD.map(x => x._2)
+            .map(_.listCells())
+            .flatMap(x => x.asScala.map(cell => constrFeat(cell)))
+        flattenRDD
+    }
 
-    val flatResultRDD = hbaseResultRDD.map(x => x._2)
-      .map(_.listCells())
-      .flatMap(x => x.asScala.map(cell => constrFeat(cell)))
+    def computeFeats(flattenRDD: RDD[Array[String]], featNames: String, num: Integer, seed: Long): JavaRDD[Array[String]] = {
 
-    val outputRDD = flatResultRDD
-      .groupBy(ft => ft(0) + ft(2)) // group key is udid + ts
-      .map((groupKey: String, feats: Iterable[Array[String]]) => {
-      val featMap = new util.HashMap[String, String]()
-      feats.foreach(featMap.put(_(1), _(3)))
+        println("========> grouping flatten rdd...")
+        val groupedRDD = flattenRDD
+            .groupBy(ft => ft(0) + "," + ft(2)) // group key is udid + ts
 
-      val resultFeats = ""
-      conf.get("feats").split(',').foreach(ft => {
-        if (resultFeats == "") resultFeats += featMap.get(ft)
-        else resultFeats += "," + featMap.get(ft)
-      })
+        println("========> counting grouped rdd...")
+        val count = groupedRDD.count()
 
-      return Array(ft(0), resultFeats, ft(2)) // Array(udid, features, ts)
-    })
+        println("========> sampling grouped rdd...")
+        val sampledRDD = groupedRDD.sample(false, 1.0 * num / count, seed)
 
-    JavaRDD.fromRDD(outputRDD)
-  }
+        println("========> converting to output format...")
+        val outputRDD = sampledRDD.map(item => {
 
-  //////////////// APIs
-  /**
-   * @param jsc
-   * @param featList
-   * @param dateRange
-   * @return
-   */
-  def getFeats(jsc: JavaSparkContext, featList: String, dateRange: String): JavaRDD[Array[String]] = {
+            val groupKey = item._1
+            val feats = item._2
 
-    val conf = FeatBaseService.getConf("udid_feat_base", featList, dateRange)
+            val featMap = new util.HashMap[String, String]() // feat name -> feat val
+            feats.foreach(ft => featMap.put(ft(1), ft(3)))
 
-    val featRdd = FeatBaseService.getFeats(jsc, conf)
+            val resultFeats = new util.ArrayList[String]()
+            featNames.split(',').foreach(ftName => resultFeats.add(featMap(ftName)))
 
-    featRdd
-  }
+            val splits = groupKey.split(',')
+            val udid = splits(0)
+            val ts = splits(1)
+
+            val outputArray = new util.ArrayList[String]()
+
+            outputArray.add(udid)
+            outputArray.addAll(resultFeats)
+            outputArray.add(ts)
+
+            outputArray.toArray(new Array[String](outputArray.size)) // e.g. Array(udid, feat1, feat2, feat3, ts)
+        })
+
+        JavaRDD.fromRDD(outputRDD)
+    }
+
+    //////////////// APIs
+    /**
+     * @param jsc
+     * @param featList
+     * @param dateRange
+     * @return
+     */
+    def getFeats(jsc: JavaSparkContext, featList: String, dateRange: String, num: Integer, seed: Long): JavaRDD[Array[String]] = {
+
+        val conf = FeatBaseService.getConf("udid_feat_base", featList, dateRange)
+
+        val hbaseResultRDD = FeatBaseService.getHBaseFeats(jsc, conf)
+
+        val outputRDD = FeatBaseService.computeFeats(hbaseResultRDD, featList, num, seed)
+
+        outputRDD
+    }
 }
