@@ -43,13 +43,18 @@ object FeatBaseService {
         val dateEnd = dates(1)
 
         if (dateStart == dateEnd) {
+            println("========>setting SCAN_TIMESTAMP = %s".format(dateStart))
             conf.set(TableInputFormat.SCAN_TIMESTAMP, dateStart)
         } else {
+            println("========>setting SCAN_TIMERANGE_START = %s, SCAN_TIMERANGE_END = %s".format(dateStart, dateEnd))
             conf.set(TableInputFormat.SCAN_TIMERANGE_START, dateStart)
             conf.set(TableInputFormat.SCAN_TIMERANGE_END, dateEnd)
         }
 
+        println("========>setting SCAN_COLUMNS = %s".format(cols))
         conf.set(TableInputFormat.SCAN_COLUMNS, cols)
+
+        println("========>setting SCAN_CACHEDROWS = %s".format(scanCachedRows.toString))
         conf.set(TableInputFormat.SCAN_CACHEDROWS, scanCachedRows.toString)
 
         conf
