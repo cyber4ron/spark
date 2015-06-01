@@ -156,5 +156,4 @@ exportMethods("takeSample",
               "lapply")
 
 export("callJStatic",
-       "RDD",
-       "convertJListToRList")
+       "RDD")
