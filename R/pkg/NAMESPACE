@@ -145,7 +145,8 @@ export("structField",
        "print.structType")
 
 # feature base service api
-export("getFeats")
+export("getFeats",
+       "getFeatsInit")
 
 # additional added
 export("textFile",
@@ -153,3 +154,7 @@ export("textFile",
 
 exportMethods("takeSample",
               "lapply")
+
+export("callJStatic",
+       "RDD",
+       "convertJListToRList")
