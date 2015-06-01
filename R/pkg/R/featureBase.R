@@ -15,7 +15,7 @@ getFeats <- function(sc, featList, featTypeList, dateRange, num, seed = base::sa
 
   # Assume the RDD contains serialized R objects.
   # type of element of RDD is charactor vector.
-  sampledRDD <- RDD(jrdd, "byte")
+  sampledRDD <- RDD(jrdd, "string")
 
   colTypes <- unlist(strsplit(featTypeList, ','))
   colCount <- length(colTypes)

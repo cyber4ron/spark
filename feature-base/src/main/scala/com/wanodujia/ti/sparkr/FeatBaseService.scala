@@ -54,6 +54,9 @@ object FeatBaseService {
         println("========>setting SCAN_COLUMNS = %s".format(cols))
         conf.set(TableInputFormat.SCAN_COLUMNS, cols)
 
+        println("========>setting SCAN_MAXVERSIONS = %s".format(100000000))
+        conf.set(TableInputFormat.SCAN_MAXVERSIONS, 100000000)
+
         println("========>setting SCAN_CACHEDROWS = %s".format(scanCachedRows.toString))
         conf.set(TableInputFormat.SCAN_CACHEDROWS, scanCachedRows.toString)
 
