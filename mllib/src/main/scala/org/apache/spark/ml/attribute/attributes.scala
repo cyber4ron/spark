@@ -19,7 +19,12 @@ package org.apache.spark.ml.attribute
 
 import scala.annotation.varargs
 
+<<<<<<< HEAD
 import org.apache.spark.sql.types.{DoubleType, Metadata, MetadataBuilder, StructField}
+=======
+import org.apache.spark.annotation.DeveloperApi
+import org.apache.spark.sql.types.{DoubleType, NumericType, Metadata, MetadataBuilder, StructField}
+>>>>>>> upstream/master
 
 /**
  * Abstract class for ML attributes.
@@ -124,7 +129,7 @@ private[attribute] trait AttributeFactory {
    * Creates an [[Attribute]] from a [[StructField]] instance.
    */
   def fromStructField(field: StructField): Attribute = {
-    require(field.dataType == DoubleType)
+    require(field.dataType.isInstanceOf[NumericType])
     val metadata = field.metadata
     val mlAttr = AttributeKeys.ML_ATTR
     if (metadata.contains(mlAttr)) {

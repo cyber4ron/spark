@@ -17,20 +17,19 @@
 
 package org.apache.spark.serializer
 
-import java.io.ByteArrayOutputStream
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 import scala.collection.mutable
 import scala.reflect.ClassTag
 
 import com.esotericsoftware.kryo.Kryo
-import org.scalatest.FunSuite
 
-import org.apache.spark.{SharedSparkContext, SparkConf}
+import org.apache.spark.{SharedSparkContext, SparkConf, SparkFunSuite}
 import org.apache.spark.scheduler.HighlyCompressedMapStatus
 import org.apache.spark.serializer.KryoTest._
 import org.apache.spark.storage.BlockManagerId
 
-class KryoSerializerSuite extends FunSuite with SharedSparkContext {
+class KryoSerializerSuite extends SparkFunSuite with SharedSparkContext {
   conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
   conf.set("spark.kryo.registrator", classOf[MyRegistrator].getName)
 
@@ -38,9 +37,25 @@ class KryoSerializerSuite extends FunSuite with SharedSparkContext {
     val conf1 = conf.clone()
     val kryoBufferProperty = "spark.kryoserializer.buffer"
     val kryoBufferMaxProperty = "spark.kryoserializer.buffer.max"
+<<<<<<< HEAD
     conf1.set(kryoBufferProperty, "64k")
     conf1.set(kryoBufferMaxProperty, "64m")
     new KryoSerializer(conf1).newInstance()
+=======
+
+    def newKryoInstance(
+        conf: SparkConf,
+        bufferSize: String = "64k",
+        maxBufferSize: String = "64m"): SerializerInstance = {
+      val kryoConf = conf.clone()
+      kryoConf.set(kryoBufferProperty, bufferSize)
+      kryoConf.set(kryoBufferMaxProperty, maxBufferSize)
+      new KryoSerializer(kryoConf).newInstance()
+    }
+
+    // test default values
+    newKryoInstance(conf, "64k", "64m")
+>>>>>>> upstream/master
     // 2048m = 2097152k
     conf1.set(kryoBufferProperty, "2097151k")
     conf1.set(kryoBufferMaxProperty, "64m")
@@ -67,7 +82,7 @@ class KryoSerializerSuite extends FunSuite with SharedSparkContext {
     conf5.set(kryoBufferMaxProperty, "9m")
     new KryoSerializer(conf5).newInstance()
   }
-  
+
   test("basic types") {
     val ser = new KryoSerializer(conf).newInstance()
     def check[T: ClassTag](t: T) {
@@ -106,7 +121,7 @@ class KryoSerializerSuite extends FunSuite with SharedSparkContext {
     check((1, 1))
     check((1, 1L))
     check((1L, 1))
-    check((1L,  1L))
+    check((1L, 1L))
     check((1.0, 1))
     check((1, 1.0))
     check((1.0, 1.0))
@@ -144,7 +159,7 @@ class KryoSerializerSuite extends FunSuite with SharedSparkContext {
     check(List(Some(mutable.HashMap(1->1, 2->2)), None, Some(mutable.HashMap(3->4))))
     check(List(
       mutable.HashMap("one" -> 1, "two" -> 2),
-      mutable.HashMap(1->"one",2->"two",3->"three")))
+      mutable.HashMap(1->"one", 2->"two", 3->"three")))
   }
 
   test("ranges") {
@@ -358,6 +373,41 @@ class KryoSerializerSuite extends FunSuite with SharedSparkContext {
   }
 }
 
+class KryoSerializerAutoResetDisabledSuite extends SparkFunSuite with SharedSparkContext {
+  conf.set("spark.serializer", classOf[KryoSerializer].getName)
+  conf.set("spark.kryo.registrator", classOf[RegistratorWithoutAutoReset].getName)
+  conf.set("spark.kryo.referenceTracking", "true")
+  conf.set("spark.shuffle.manager", "sort")
+  conf.set("spark.shuffle.sort.bypassMergeThreshold", "200")
+
+  test("sort-shuffle with bypassMergeSort (SPARK-7873)") {
+    val myObject = ("Hello", "World")
+    assert(sc.parallelize(Seq.fill(100)(myObject)).repartition(2).collect().toSet === Set(myObject))
+  }
+
+  test("calling deserialize() after deserializeStream()") {
+    val serInstance = new KryoSerializer(conf).newInstance().asInstanceOf[KryoSerializerInstance]
+    assert(!serInstance.getAutoReset())
+    val hello = "Hello"
+    val world = "World"
+    // Here, we serialize the same value twice, so the reference-tracking should cause us to store
+    // references to some of these values
+    val helloHello = serInstance.serialize((hello, hello))
+    // Here's a stream which only contains one value
+    val worldWorld: Array[Byte] = {
+      val baos = new ByteArrayOutputStream()
+      val serStream = serInstance.serializeStream(baos)
+      serStream.writeObject(world)
+      serStream.writeObject(world)
+      serStream.close()
+      baos.toByteArray
+    }
+    val deserializationStream = serInstance.deserializeStream(new ByteArrayInputStream(worldWorld))
+    assert(deserializationStream.readValue[Any]() === world)
+    deserializationStream.close()
+    assert(serInstance.deserialize[Any](helloHello) === (hello, hello))
+  }
+}
 
 class ClassLoaderTestingObject
 

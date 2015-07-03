@@ -87,6 +87,8 @@ final class DecisionTreeClassifier(override val uid: String)
     super.getOldStrategy(categoricalFeatures, numClasses, OldAlgo.Classification, getOldImpurity,
       subsamplingRate = 1.0)
   }
+
+  override def copy(extra: ParamMap): DecisionTreeClassifier = defaultCopy(extra)
 }
 
 object DecisionTreeClassifier {

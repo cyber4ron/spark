@@ -17,8 +17,13 @@
 
 package org.apache.spark.ml.evaluation
 
+<<<<<<< HEAD
 import org.apache.spark.annotation.AlphaComponent
 import org.apache.spark.ml.param.{Param, ParamValidators}
+=======
+import org.apache.spark.annotation.Experimental
+import org.apache.spark.ml.param.{Param, ParamMap, ParamValidators}
+>>>>>>> upstream/master
 import org.apache.spark.ml.param.shared.{HasLabelCol, HasPredictionCol}
 import org.apache.spark.ml.util.{Identifiable, SchemaUtils}
 import org.apache.spark.mllib.evaluation.RegressionMetrics
@@ -37,8 +42,17 @@ final class RegressionEvaluator(override val uid: String)
   def this() = this(Identifiable.randomUID("regEval"))
 
   /**
+<<<<<<< HEAD
    * param for metric name in evaluation
    * @group param supports mse, rmse, r2, mae as valid metric names.
+=======
+   * param for metric name in evaluation (supports `"rmse"` (default), `"mse"`, `"r2"`, and `"mae"`)
+   *
+   * Because we will maximize evaluation value (ref: `CrossValidator`),
+   * when we evaluate a metric that is needed to minimize (e.g., `"rmse"`, `"mse"`, `"mae"`),
+   * we take and output the negative of this metric.
+   * @group param
+>>>>>>> upstream/master
    */
   val metricName: Param[String] = {
     val allowedParams = ParamValidators.inArray(Array("mse", "rmse", "r2", "mae"))
@@ -71,14 +85,16 @@ final class RegressionEvaluator(override val uid: String)
     val metrics = new RegressionMetrics(predictionAndLabels)
     val metric = $(metricName) match {
       case "rmse" =>
-        metrics.rootMeanSquaredError
+        -metrics.rootMeanSquaredError
       case "mse" =>
-        metrics.meanSquaredError
+        -metrics.meanSquaredError
       case "r2" =>
         metrics.r2
       case "mae" =>
-        metrics.meanAbsoluteError
+        -metrics.meanAbsoluteError
     }
     metric
   }
+
+  override def copy(extra: ParamMap): RegressionEvaluator = defaultCopy(extra)
 }
