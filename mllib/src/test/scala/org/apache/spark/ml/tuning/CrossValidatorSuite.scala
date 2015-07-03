@@ -17,15 +17,6 @@
 
 package org.apache.spark.ml.tuning
 
-<<<<<<< HEAD
-import org.scalatest.FunSuite
-
-import org.apache.spark.ml.classification.LogisticRegression
-import org.apache.spark.ml.evaluation.BinaryClassificationEvaluator
-import org.apache.spark.mllib.classification.LogisticRegressionSuite.generateLogisticInput
-import org.apache.spark.mllib.util.MLlibTestSparkContext
-import org.apache.spark.sql.{SQLContext, DataFrame}
-=======
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.ml.{Estimator, Model}
 import org.apache.spark.ml.classification.LogisticRegression
@@ -37,7 +28,6 @@ import org.apache.spark.mllib.classification.LogisticRegressionSuite.generateLog
 import org.apache.spark.mllib.util.{LinearDataGenerator, MLlibTestSparkContext}
 import org.apache.spark.sql.{DataFrame, SQLContext}
 import org.apache.spark.sql.types.StructType
->>>>>>> upstream/master
 
 class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
 
@@ -98,8 +88,6 @@ class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(parent2.getMaxIter === 10)
     assert(cvModel2.avgMetrics.length === lrParamMaps.length)
   }
-<<<<<<< HEAD
-=======
 
   test("validateParams should check estimatorParamMaps") {
     import CrossValidatorSuite._
@@ -154,5 +142,4 @@ object CrossValidatorSuite {
 
     override def copy(extra: ParamMap): MyEvaluator = defaultCopy(extra)
   }
->>>>>>> upstream/master
 }

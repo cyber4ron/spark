@@ -52,7 +52,6 @@ private[sql] class OpenHashSetUDT(
  * Creates a new set of the specified type
  */
 case class NewSet(elementType: DataType) extends LeafExpression {
-  type EvaluatedType = Any
 
   override def nullable: Boolean = false
 
@@ -83,7 +82,6 @@ case class NewSet(elementType: DataType) extends LeafExpression {
  * we don't need to do type check for it.
  */
 case class AddItemToSet(item: Expression, set: Expression) extends Expression {
-  type EvaluatedType = Any
 
   override def children: Seq[Expression] = item :: set :: Nil
 
@@ -136,7 +134,6 @@ case class AddItemToSet(item: Expression, set: Expression) extends Expression {
  * we don't need to do type check for it.
  */
 case class CombineSets(left: Expression, right: Expression) extends BinaryExpression {
-  type EvaluatedType = Any
 
   override def dataType: DataType = left.dataType
 
@@ -183,7 +180,6 @@ case class CombineSets(left: Expression, right: Expression) extends BinaryExpres
  * we don't need to do type check for it.
  */
 case class CountSet(child: Expression) extends UnaryExpression {
-  type EvaluatedType = Any
 
   override def dataType: DataType = LongType
 

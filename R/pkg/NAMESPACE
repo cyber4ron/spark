@@ -150,17 +150,3 @@ export("structField",
        "structType.jobj",
        "structType.structField",
        "print.structType")
-
-# feature base service api
-export("getFeats",
-       "getFeatsInit")
-
-# additional added
-export("textFile",
-       "parallelize")
-
-exportMethods("takeSample",
-              "lapply")
-
-export("callJStatic",
-       "RDD")

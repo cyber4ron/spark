@@ -109,12 +109,8 @@ trait ExtractValue {
 abstract class ExtractValueWithStruct extends UnaryExpression with ExtractValue {
   self: Product =>
 
-<<<<<<< HEAD
-  type EvaluatedType = Any
-=======
   def field: StructField
   override def toString: String = s"$child.${field.name}"
->>>>>>> upstream/master
 }
 
 /**

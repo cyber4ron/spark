@@ -26,7 +26,6 @@ import org.apache.spark.sql.types._
  * we don't need to do type check for it.
  */
 case class UnscaledValue(child: Expression) extends UnaryExpression {
-  override type EvaluatedType = Any
 
   override def dataType: DataType = LongType
   override def toString: String = s"UnscaledValue($child)"
@@ -51,7 +50,6 @@ case class UnscaledValue(child: Expression) extends UnaryExpression {
  * we don't need to do type check for it.
  */
 case class MakeDecimal(child: Expression, precision: Int, scale: Int) extends UnaryExpression {
-  override type EvaluatedType = Decimal
 
   override def dataType: DataType = DecimalType(precision, scale)
   override def toString: String = s"MakeDecimal($child,$precision,$scale)"

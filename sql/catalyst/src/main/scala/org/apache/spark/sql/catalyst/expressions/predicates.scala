@@ -36,8 +36,6 @@ trait Predicate extends Expression {
   self: Product =>
 
   override def dataType: DataType = BooleanType
-
-  type EvaluatedType = Any
 }
 
 trait PredicateHelper {
@@ -296,13 +294,6 @@ case class EqualNullSafe(left: Expression, right: Expression) extends BinaryComp
 
   override protected def checkTypesInternal(t: DataType) = TypeCheckResult.TypeCheckSuccess
 
-<<<<<<< HEAD
-  type EvaluatedType = Any
-
-  override def eval(input: Row): Any = {
-    if (true == predicate.eval(input)) {
-      trueValue.eval(input)
-=======
   override def eval(input: InternalRow): Any = {
     val l = left.eval(input)
     val r = right.eval(input)
@@ -310,7 +301,6 @@ case class EqualNullSafe(left: Expression, right: Expression) extends BinaryComp
       true
     } else if (l == null || r == null) {
       false
->>>>>>> upstream/master
     } else {
       if (left.dataType != BinaryType) l == r
       else java.util.Arrays.equals(l.asInstanceOf[Array[Byte]], r.asInstanceOf[Array[Byte]])
@@ -332,17 +322,8 @@ case class EqualNullSafe(left: Expression, right: Expression) extends BinaryComp
 case class LessThan(left: Expression, right: Expression) extends BinaryComparison {
   override def symbol: String = "<"
 
-<<<<<<< HEAD
-  type EvaluatedType = Any
-
-  // Note that `branches` are considered in consecutive pairs (cond, val), and the optional last
-  // element is the value for the default catch-all case (if provided).
-  // Hence, `branches` consists of at least two elements, and can have an odd or even length.
-  def branches: Seq[Expression]
-=======
   override protected def checkTypesInternal(t: DataType) =
     TypeUtils.checkForOrderingExpr(left.dataType, "operator " + symbol)
->>>>>>> upstream/master
 
   private lazy val ordering = TypeUtils.getOrdering(left.dataType)
 

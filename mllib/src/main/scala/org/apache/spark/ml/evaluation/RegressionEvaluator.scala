@@ -17,13 +17,8 @@
 
 package org.apache.spark.ml.evaluation
 
-<<<<<<< HEAD
-import org.apache.spark.annotation.AlphaComponent
-import org.apache.spark.ml.param.{Param, ParamValidators}
-=======
 import org.apache.spark.annotation.Experimental
 import org.apache.spark.ml.param.{Param, ParamMap, ParamValidators}
->>>>>>> upstream/master
 import org.apache.spark.ml.param.shared.{HasLabelCol, HasPredictionCol}
 import org.apache.spark.ml.util.{Identifiable, SchemaUtils}
 import org.apache.spark.mllib.evaluation.RegressionMetrics
@@ -31,28 +26,22 @@ import org.apache.spark.sql.{DataFrame, Row}
 import org.apache.spark.sql.types.DoubleType
 
 /**
- * :: AlphaComponent ::
- *
+ * :: Experimental ::
  * Evaluator for regression, which expects two input columns: prediction and label.
  */
-@AlphaComponent
+@Experimental
 final class RegressionEvaluator(override val uid: String)
   extends Evaluator with HasPredictionCol with HasLabelCol {
 
   def this() = this(Identifiable.randomUID("regEval"))
 
   /**
-<<<<<<< HEAD
-   * param for metric name in evaluation
-   * @group param supports mse, rmse, r2, mae as valid metric names.
-=======
    * param for metric name in evaluation (supports `"rmse"` (default), `"mse"`, `"r2"`, and `"mae"`)
    *
    * Because we will maximize evaluation value (ref: `CrossValidator`),
    * when we evaluate a metric that is needed to minimize (e.g., `"rmse"`, `"mse"`, `"mae"`),
    * we take and output the negative of this metric.
    * @group param
->>>>>>> upstream/master
    */
   val metricName: Param[String] = {
     val allowedParams = ParamValidators.inArray(Array("mse", "rmse", "r2", "mae"))

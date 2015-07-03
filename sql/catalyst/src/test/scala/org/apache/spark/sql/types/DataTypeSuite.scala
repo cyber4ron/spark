@@ -17,11 +17,7 @@
 
 package org.apache.spark.sql.types
 
-<<<<<<< HEAD
-import org.scalatest.FunSuite
-=======
 import org.apache.spark.{SparkException, SparkFunSuite}
->>>>>>> upstream/master
 
 class DataTypeSuite extends SparkFunSuite {
 
@@ -104,8 +100,6 @@ class DataTypeSuite extends SparkFunSuite {
     }
   }
 
-<<<<<<< HEAD
-=======
   test("fieldsMap returns map of name to StructField") {
     val struct = StructType(
       StructField("a", LongType) ::
@@ -176,7 +170,6 @@ class DataTypeSuite extends SparkFunSuite {
     }
   }
 
->>>>>>> upstream/master
   def checkDataTypeJsonRepr(dataType: DataType): Unit = {
     test(s"JSON - $dataType") {
       assert(DataType.fromJson(dataType.json) === dataType)
@@ -228,11 +221,7 @@ class DataTypeSuite extends SparkFunSuite {
   checkDefaultSize(DecimalType(10, 5), 4096)
   checkDefaultSize(DecimalType.Unlimited, 4096)
   checkDefaultSize(DateType, 4)
-<<<<<<< HEAD
-  checkDefaultSize(TimestampType,12)
-=======
   checkDefaultSize(TimestampType, 8)
->>>>>>> upstream/master
   checkDefaultSize(StringType, 4096)
   checkDefaultSize(BinaryType, 4096)
   checkDefaultSize(ArrayType(DoubleType, true), 800)

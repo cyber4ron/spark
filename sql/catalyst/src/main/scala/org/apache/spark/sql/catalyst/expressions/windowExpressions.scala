@@ -65,13 +65,7 @@ case class WindowSpecDefinition(
     }
   }
 
-<<<<<<< HEAD
-  type EvaluatedType = Any
-
-  override def children: Seq[Expression]  = partitionSpec ++ orderSpec
-=======
   override def children: Seq[Expression] = partitionSpec ++ orderSpec
->>>>>>> upstream/master
 
   override lazy val resolved: Boolean =
     childrenResolved && checkInputDataTypes().isSuccess &&
@@ -80,11 +74,7 @@ case class WindowSpecDefinition(
 
   override def toString: String = simpleString
 
-<<<<<<< HEAD
-  override def eval(input: Row): EvaluatedType = throw new UnsupportedOperationException
-=======
   override def eval(input: InternalRow): Any = throw new UnsupportedOperationException
->>>>>>> upstream/master
   override def nullable: Boolean = true
   override def foldable: Boolean = false
   override def dataType: DataType = throw new UnsupportedOperationException
@@ -307,11 +297,7 @@ case class UnresolvedWindowFunction(
   override def get(index: Int): Any =
     throw new UnresolvedException(this, "get")
   // Unresolved functions are transient at compile time and don't get evaluated during execution.
-<<<<<<< HEAD
-  override def eval(input: Row = null): EvaluatedType =
-=======
   override def eval(input: InternalRow = null): Any =
->>>>>>> upstream/master
     throw new TreeNodeException(this, s"No function to evaluate expression. type: ${this.nodeName}")
 
   override def toString: String = s"'$name(${children.mkString(",")})"
@@ -323,33 +309,25 @@ case class UnresolvedWindowFunction(
 case class UnresolvedWindowExpression(
     child: UnresolvedWindowFunction,
     windowSpec: WindowSpecReference) extends UnaryExpression {
+
   override def dataType: DataType = throw new UnresolvedException(this, "dataType")
   override def foldable: Boolean = throw new UnresolvedException(this, "foldable")
   override def nullable: Boolean = throw new UnresolvedException(this, "nullable")
   override lazy val resolved = false
 
   // Unresolved functions are transient at compile time and don't get evaluated during execution.
-<<<<<<< HEAD
-  override def eval(input: Row = null): EvaluatedType =
-=======
   override def eval(input: InternalRow = null): Any =
->>>>>>> upstream/master
     throw new TreeNodeException(this, s"No function to evaluate expression. type: ${this.nodeName}")
 }
 
 case class WindowExpression(
     windowFunction: WindowFunction,
     windowSpec: WindowSpecDefinition) extends Expression {
-  override type EvaluatedType = Any
 
   override def children: Seq[Expression] =
     windowFunction :: windowSpec :: Nil
 
-<<<<<<< HEAD
-  override def eval(input: Row): EvaluatedType =
-=======
   override def eval(input: InternalRow): Any =
->>>>>>> upstream/master
     throw new TreeNodeException(this, s"No function to evaluate expression. type: ${this.nodeName}")
 
   override def dataType: DataType = windowFunction.dataType

@@ -27,8 +27,6 @@ import org.apache.spark.unsafe.types.UTF8String
 trait StringRegexExpression extends ExpectsInputTypes {
   self: BinaryExpression =>
 
-  type EvaluatedType = Any
-
   def escape(v: String): String
   def matches(regex: Pattern, str: String): Boolean
 
@@ -116,8 +114,6 @@ case class RLike(left: Expression, right: Expression)
 trait CaseConversionExpression extends ExpectsInputTypes {
   self: UnaryExpression =>
 
-  type EvaluatedType = Any
-
   def convert(v: UTF8String): UTF8String
 
   override def dataType: DataType = StringType
@@ -162,8 +158,6 @@ trait StringComparison extends ExpectsInputTypes {
   self: BinaryExpression =>
 
   def compare(l: UTF8String, r: UTF8String): Boolean
-
-  override type EvaluatedType = Any
 
   override def nullable: Boolean = left.nullable || right.nullable
 
@@ -222,8 +216,6 @@ case class EndsWith(left: Expression, right: Expression)
  */
 case class Substring(str: Expression, pos: Expression, len: Expression)
   extends Expression with ExpectsInputTypes {
-  
-  type EvaluatedType = Any
 
   def this(str: Expression, pos: Expression) = {
     this(str, pos, Literal(Integer.MAX_VALUE))

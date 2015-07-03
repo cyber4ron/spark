@@ -57,13 +57,8 @@ private[spark] case class PythonUDF(
 
   override def nullable: Boolean = true
 
-<<<<<<< HEAD:sql/core/src/main/scala/org/apache/spark/sql/execution/pythonUdfs.scala
-  override def eval(input: Row): PythonUDF.this.EvaluatedType = {
-    sys.error("PythonUDFs can not be directly evaluated.")
-=======
   override def eval(input: InternalRow): Any = {
     throw new UnsupportedOperationException("PythonUDFs can not be directly evaluated.")
->>>>>>> upstream/master:sql/core/src/main/scala/org/apache/spark/sql/execution/pythonUDFs.scala
   }
 }
 

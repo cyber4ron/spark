@@ -33,4 +33,3 @@ Collate:
     'sparkR.R'
     'utils.R'
     'zzz.R'
-    'featureBase.R'

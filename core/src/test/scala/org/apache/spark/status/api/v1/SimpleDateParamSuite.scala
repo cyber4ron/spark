@@ -14,22 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.spark.status.api.v1
 
-package org.apache.spark.sql.execution.expressions
+import javax.ws.rs.WebApplicationException
 
-import org.apache.spark.TaskContext
-import org.apache.spark.sql.catalyst.expressions.{LeafExpression, InternalRow}
-import org.apache.spark.sql.types.{IntegerType, DataType}
+import org.scalatest.Matchers
 
+import org.apache.spark.SparkFunSuite
 
-/**
- * Expression that returns the current partition id of the Spark task.
- */
-private[sql] case object SparkPartitionID extends LeafExpression {
+class SimpleDateParamSuite extends SparkFunSuite with Matchers {
 
-  override def nullable: Boolean = false
+  test("date parsing") {
+    new SimpleDateParam("2015-02-20T23:21:17.190GMT").timestamp should be (1424474477190L)
+    new SimpleDateParam("2015-02-20T17:21:17.190EST").timestamp should be (1424470877190L)
+    new SimpleDateParam("2015-02-20").timestamp should be (1424390400000L) // GMT
+    intercept[WebApplicationException] {
+      new SimpleDateParam("invalid date")
+    }
+  }
 
-  override def dataType: DataType = IntegerType
-
-  override def eval(input: InternalRow): Int = TaskContext.get().partitionId()
 }

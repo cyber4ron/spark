@@ -311,15 +311,9 @@ private[sql] object DataSourceStrategy extends Strategy with Logging {
   private[this] def toCatalystRDD(
       relation: LogicalRelation,
       output: Seq[Attribute],
-<<<<<<< HEAD
-      rdd: RDD[Row]): SparkPlan = {
-    val converted = if (relation.needConversion) {
-      execution.RDDConversions.rowToRowRdd(rdd, relation.schema)
-=======
       rdd: RDD[Row]): RDD[InternalRow] = {
     if (relation.relation.needConversion) {
       execution.RDDConversions.rowToRowRdd(rdd, output.map(_.dataType))
->>>>>>> upstream/master
     } else {
       rdd.map(_.asInstanceOf[InternalRow])
     }

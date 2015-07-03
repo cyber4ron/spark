@@ -81,10 +81,6 @@ case class Literal protected (value: Any, dataType: DataType) extends LeafExpres
 
   override def toString: String = if (value != null) value.toString else "null"
 
-<<<<<<< HEAD
-  type EvaluatedType = Any
-  override def eval(input: Row): Any = value
-=======
   override def equals(other: Any): Boolean = other match {
     case o: Literal =>
       dataType.equals(o.dataType) &&
@@ -141,13 +137,11 @@ case class Literal protected (value: Any, dataType: DataType) extends LeafExpres
       }
     }
   }
->>>>>>> upstream/master
 }
 
 // TODO: Specialize
 case class MutableLiteral(var value: Any, dataType: DataType, nullable: Boolean = true)
     extends LeafExpression {
-  type EvaluatedType = Any
 
   def update(expression: Expression, input: InternalRow): Unit = {
     value = expression.eval(input)

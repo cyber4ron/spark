@@ -24,21 +24,16 @@ import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.types.{IntegerType, StringType, NullType}
 
 case class Dummy(optKey: Option[Expression]) extends Expression {
-  def children: Seq[Expression] = optKey.toSeq
-  def nullable: Boolean = true
-  def dataType: NullType = NullType
+  override def children: Seq[Expression] = optKey.toSeq
+  override def nullable: Boolean = true
+  override def dataType: NullType = NullType
   override lazy val resolved = true
-<<<<<<< HEAD
-  type EvaluatedType = Any
-  def eval(input: Row): Any = null.asInstanceOf[Any]
-=======
   override def eval(input: InternalRow): Any = null.asInstanceOf[Any]
 }
 
 case class ComplexPlan(exprs: Seq[Seq[Expression]])
   extends org.apache.spark.sql.catalyst.plans.logical.LeafNode {
   override def output: Seq[Attribute] = Nil
->>>>>>> upstream/master
 }
 
 class TreeNodeSuite extends SparkFunSuite {

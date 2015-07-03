@@ -47,7 +47,11 @@ private[sql] object JDBCRDD extends Logging {
    * @param sqlType - A field of java.sql.Types
    * @return The Catalyst type corresponding to sqlType.
    */
-  private def getCatalystType(sqlType: Int, precision: Int, scale: Int): DataType = {
+  private def getCatalystType(
+      sqlType: Int,
+      precision: Int,
+      scale: Int,
+      signed: Boolean): DataType = {
     val answer = sqlType match {
       // scalastyle:off
       case java.sql.Types.ARRAY         => null
@@ -66,7 +70,7 @@ private[sql] object JDBCRDD extends Logging {
       case java.sql.Types.DISTINCT      => null
       case java.sql.Types.DOUBLE        => DoubleType
       case java.sql.Types.FLOAT         => FloatType
-      case java.sql.Types.INTEGER       => IntegerType
+      case java.sql.Types.INTEGER       => if (signed) { IntegerType } else { LongType }
       case java.sql.Types.JAVA_OBJECT   => null
       case java.sql.Types.LONGNVARCHAR  => StringType
       case java.sql.Types.LONGVARBINARY => BinaryType
@@ -126,11 +130,12 @@ private[sql] object JDBCRDD extends Logging {
           val typeName = rsmd.getColumnTypeName(i + 1)
           val fieldSize = rsmd.getPrecision(i + 1)
           val fieldScale = rsmd.getScale(i + 1)
+          val isSigned = rsmd.isSigned(i + 1)
           val nullable = rsmd.isNullable(i + 1) != ResultSetMetaData.columnNoNulls
           val metadata = new MetadataBuilder().putString("name", columnName)
           val columnType =
             dialect.getCatalystType(dataType, typeName, fieldSize, metadata).getOrElse(
-              getCatalystType(dataType, fieldSize, fieldScale))
+              getCatalystType(dataType, fieldSize, fieldScale, isSigned))
           fields(i) = StructField(columnName, columnType, nullable, metadata.build())
           i = i + 1
         }
